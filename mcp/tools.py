@@ -14,7 +14,35 @@ def mcp_tool(name, description):
 
     return decorator
 
+import sqlparse
 
+
+@mcp_tool(
+    name="check_sql_syntax",
+    description="Validate SQL syntax"
+)
+def check_sql_syntax(query):
+
+    try:
+
+        parsed = sqlparse.parse(query)
+
+        if not parsed:
+            return {
+                "valid": False,
+                "error": "Invalid SQL syntax"
+            }
+
+        return {
+            "valid": True
+        }
+
+    except Exception:
+
+        return {
+            "valid": False,
+            "error": "Parsing failed"
+        }
 @mcp_tool(
     name="analyze_query",
     description="Analyze SQL query performance patterns"
@@ -64,11 +92,25 @@ def suggest_optimization(case_text):
 
     suggestions = []
 
-    if "SELECT *" in case_text:
+    if "SELECT *" in query:
         suggestions.append(
-            "Avoid SELECT *; fetch required columns"
+        "Specify required columns instead of SELECT *"
+    )
+
+    if "JOIN" in query:
+        suggestions.append(
+            "Add index on JOIN columns"
         )
 
+    if "ORDER BY" in query:
+        suggestions.append(
+            "Index ORDER BY column"
+        )
+
+    if "WHERE" not in query:
+        suggestions.append(
+            "Add WHERE clause to reduce scan"
+        )
     if "JSON" in case_text:
         suggestions.append(
             "Add index on JSON field"
