@@ -1,0 +1,146 @@
+[{
+  "case_id": "case_1",
+  "description": "Full table scan due to SELECT * usage",
+  "query": "SELECT * FROM large_table",
+  "latency": "very high",
+  "context": "Large dataset with millions of rows and no WHERE clause",
+  "root_cause": "Full table scan caused by missing filtering conditions",
+  "suggestion": "Add WHERE clause and create indexes on frequently filtered columns",
+  "tags": ["full_table_scan", "no_filter"]
+},
+{
+  "case_id": "case_2",
+  "description": "JSON filtering without index causes slow performance",
+  "query": "SELECT * FROM policy_data WHERE JSON_EXTRACT(data, '$.policy.state') = 'CA'",
+  "latency": "25 seconds",
+  "context": "Large dataset and JSON field not indexed",
+  "root_cause": "No index on JSON field",
+  "suggestion": "Create functional index on JSON field or extract JSON field into column",
+  "tags": ["json", "no_index"]
+},
+{
+  "case_id": "case_3",
+  "description": "Complex join between multiple large tables",
+  "query": "SELECT * FROM orders o JOIN customers c ON o.customer_id = c.id JOIN payments p ON p.order_id = o.id",
+  "latency": "medium to high",
+  "context": "Multiple joins without proper indexing",
+  "root_cause": "Missing indexes on join keys",
+  "suggestion": "Add indexes on join columns such as customer_id and order_id",
+  "tags": ["join", "missing_index"]
+},{
+  "case_id": "case_4",
+  "description": "High-frequency query executed thousands of times",
+  "query": "SELECT * FROM config_table WHERE key = ?",
+  "latency": "low",
+  "context": "Query executed very frequently",
+  "root_cause": "Repeated execution without caching",
+  "suggestion": "Implement caching for frequently accessed configuration data",
+  "tags": ["frequency", "caching"]
+},{
+  "case_id": "case_5",
+  "description": "Nested subquery slowing performance",
+  "query": "SELECT * FROM orders WHERE customer_id IN (SELECT id FROM customers WHERE state = 'CA')",
+  "latency": "high",
+  "context": "Subquery executed repeatedly",
+  "root_cause": "Nested subquery inefficiency",
+  "suggestion": "Replace subquery with JOIN",
+  "tags": ["subquery"]
+},{
+  "case_id": "case_6",
+  "description": "Filtering column without index",
+  "query": "SELECT * FROM orders WHERE order_date = '2024-01-01'",
+  "latency": "high",
+  "context": "Filtering column not indexed",
+  "root_cause": "Missing index on order_date",
+  "suggestion": "Add index on order_date column",
+  "tags": ["where_clause"]
+},
+{
+  "case_id": "case_7",
+  "description": "Aggregation across multiple tables",
+  "query": "SELECT COUNT(*) FROM orders o JOIN customers c ON o.customer_id = c.id",
+  "latency": "medium",
+  "context": "Aggregation across large tables",
+  "root_cause": "Join cost and table size",
+  "suggestion": "Use indexed columns and pre-aggregated tables",
+  "tags": ["aggregation"]
+},
+{
+  "case_id": "case_8",
+  "description": "Querying large logging table",
+  "query": "SELECT * FROM logs WHERE timestamp > '2024-01-01'",
+  "latency": "high",
+  "context": "Logs table extremely large",
+  "root_cause": "Large table scanning",
+  "suggestion": "Partition logs table by date",
+  "tags": ["logging"]
+},{
+  "case_id": "case_9",
+  "description": "Slow update query",
+  "query": "UPDATE orders SET status = 'shipped' WHERE order_id = 123",
+  "latency": "medium",
+  "context": "Large number of update operations",
+  "root_cause": "Lock contention",
+  "suggestion": "Optimize indexing and reduce locking scope",
+  "tags": ["update"]
+},
+{
+  "case_id": "case_10",
+  "description": "Sudden spike in latency",
+  "query": "SELECT * FROM transaction_table",
+  "latency": "50 seconds",
+  "context": "Previous latency was 1 second",
+  "root_cause": "Unexpected workload spike",
+  "suggestion": "Investigate system load and add monitoring alerts",
+  "tags": ["anomaly"]
+},
+{
+  "case_id": "case_11",
+  "description": "Sorting large dataset",
+  "query": "SELECT * FROM orders ORDER BY created_date",
+  "latency": "high",
+  "context": "Sorting without index",
+  "root_cause": "No index on sorting column",
+  "suggestion": "Add index on created_date",
+  "tags": ["sorting"]
+},
+{
+  "case_id": "case_12",
+  "description": "Wildcard LIKE query",
+  "query": "SELECT * FROM customers WHERE name LIKE '%john%'",
+  "latency": "high",
+  "context": "Wildcard search prevents index usage",
+  "root_cause": "Leading wildcard disables index",
+  "suggestion": "Use full-text search index",
+  "tags": ["like"]
+},
+{
+  "case_id": "case_13",
+  "description": "Multiple redundant indexes",
+  "query": "SELECT * FROM orders WHERE customer_id = 101",
+  "latency": "medium",
+  "context": "Multiple overlapping indexes",
+  "root_cause": "Index overhead",
+  "suggestion": "Remove redundant indexes",
+  "tags": ["index"]
+},
+{
+  "case_id": "case_14",
+  "description": "Large result set transfer",
+  "query": "SELECT * FROM transactions",
+  "latency": "very high",
+  "context": "Huge number of rows returned",
+  "root_cause": "Excessive data transfer",
+  "suggestion": "Limit returned rows using pagination",
+  "tags": ["pagination"]
+},{
+  "case_id": "case_15",
+  "description": "Memory pressure affecting performance",
+  "query": "SELECT * FROM large_memory_table",
+  "latency": "high",
+  "context": "System running low on memory",
+  "root_cause": "Memory bottleneck",
+  "suggestion": "Increase memory or optimize query memory usage",
+  "tags": ["memory"]
+}
+]
