@@ -1,19 +1,24 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>SQL AI Agent</title>
-</head>
-<body>
+<link rel="stylesheet" href="/static/styles.css">
+
+<div class="container">
 
 <h2>SQL Analyzer</h2>
 
-<textarea id="query" rows="4" cols="50"></textarea><br><br>
+<textarea id="query" rows="4"></textarea><br>
 
 <button onclick="sendQuery()">Analyze</button>
 
 <pre id="output"></pre>
 
+</div>
+
 <script>
+function renderField(label, value) {
+    if (!value) return "";
+    return `• ${label}: ${value}\n`;
+}
 function renderResponse(data) {
     return `
 ================ SQL AI ANALYSIS ================
@@ -30,11 +35,21 @@ ${data.latency}s
 --------------------------------------------------
 
 ANALYSIS:
-• Problem: ${data.analysis?.problem || "-"}
-• Root Cause: ${data.analysis?.root_cause || "-"}
-• Suggestion: ${data.analysis?.suggestion || "-"}
-• Confidence: ${data.analysis?.confidence || "-"}
 
+${renderField("Problem", data.analysis?.problem)}
+${renderField("Root Cause", data.analysis?.root_cause)}
+${renderField("Suggestion", data.analysis?.suggestion)}
+
+${renderField("Performance Risk", data.analysis?.performance_risk)}
+${renderField("Complexity", data.analysis?.complexity)}
+${renderField("Bottleneck Type", data.analysis?.bottleneck_type)}
+${renderField("Priority", data.analysis?.priority)}
+
+${renderField("Index Recommendation", data.analysis?.index_recommendation)}
+${renderField("Risk Summary", data.analysis?.risk_summary)}
+
+${renderField("Confidence", data.analysis?.confidence)}
+--------------------------------------------------
 --------------------------------------------------
 
 SQL INFO:
@@ -72,6 +87,24 @@ ${data.error}
 async function sendQuery() {
     const query = document.getElementById("query").value;
     document.getElementById("output").textContent = "Processing...";
+    setTimeout(() => {
+        document.getElementById("output").textContent += "Analyzing SQL query...\n";
+    }, 500);
+
+    setTimeout(() => {
+        document.getElementById("output").textContent += "Checking execution plan...\n";
+    }, 1500);
+
+    setTimeout(() => {
+        document.getElementById("output").textContent += "Looking for similar cases...\n";
+    }, 3000);
+
+    setTimeout(() => {
+        document.getElementById("output").textContent += "This might take a while...\n";
+    }, 3000);
+    setTimeout(() => {
+        document.getElementById("output").textContent += "Almost there...\n";
+    }, 5000);
     const res = await fetch("/ask", {
         method: "POST",
         headers: {"Content-Type": "application/json"},

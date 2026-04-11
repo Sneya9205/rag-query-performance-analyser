@@ -91,7 +91,7 @@ def detect_anomaly(query):
     description="Suggest SQL optimizations"
 )
 def suggest_optimization(query):
-
+    query = query.upper()
     suggestions = []
 
     if "SELECT *" in query:

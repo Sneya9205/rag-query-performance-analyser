@@ -50,13 +50,68 @@ def extract_tool_call(output):
 def generate_response(user_query, retrieved_case):
 
     TOOLS_DESCRIPTION = """
-        Available tools:
+    Available tools and when to use them:
 
-        1. analyze_query(query)
-        2. detect_anomaly(query)
-        3. suggest_optimization(query)
-        """
+    1. check_sql_syntax(query)
+    Use when:
+    - Query may contain syntax errors
+    - Query fails parsing
 
+    2. analyze_query(query)
+    Use when:
+    - Query contains SELECT *
+    - Query contains JOIN
+    - Query scans large tables
+    - Query structure suggests performance risk
+
+    3. detect_anomaly(plan)
+    Use when:
+    - Execution plan contains full table scan
+    - Latency risk appears unusually high
+
+    4. suggest_optimization(query)
+    Use when:
+    - Query contains SELECT *
+    - Query contains JSON extraction
+    - Query contains ORDER BY
+    - Query contains JOIN
+    - Query lacks WHERE clause
+
+    Always choose the most relevant tool.
+    Return exactly one tool call.
+    """
+    prompt = f"""
+    You are a SQL performance expert.
+    {TOOLS_DESCRIPTION}
+    Analyze the SQL query risk.
+
+    QUERY:
+    {user_query}
+
+    SIMILAR CASE:
+    {retrieved_case}
+
+    Return ONLY valid JSON.
+
+    JSON FORMAT:
+
+    {{
+    "issue": "...",
+    "root_cause": "...",
+    "suggestion": "...",
+
+    "performance_risk": "low|medium|high",
+    "complexity": "low|medium|high",
+    "bottleneck_type": "scan|join|index|json|sort|unknown",
+
+    "priority": "low|medium|high",
+    "index_recommendation": "...",
+
+    "risk_summary": "...",
+    "confidence": 0.0
+    }}
+    """
+    '''
     prompt = f"""
         You are a strict tool-calling system.
 
@@ -81,6 +136,7 @@ def generate_response(user_query, retrieved_case):
         Retrieved Case:
         {retrieved_case}
     """
+    '''
     response = call_llm(prompt)
     output = response["message"]["content"]
 

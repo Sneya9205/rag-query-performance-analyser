@@ -16,6 +16,29 @@ CORS(app)
 @app.route("/")
 def home():
     return render_template("index.html")
+def extract_from_case(case_text, field):
+
+    if not case_text:
+        return ""
+
+    match = re.search(
+        rf"{field}:\s*(.*)",
+        case_text,
+        re.IGNORECASE
+    )
+
+    return match.group(1).strip() if match else ""
+def get_field(llm_output, similar_case, llm_key, rag_key):
+
+    value = llm_output.get(llm_key)
+
+    if value:
+        return value
+
+    return extract_from_case(
+        similar_case,
+        rag_key
+    )
 def build_response(query, case_type, plan, rag_result, llm_output,query_latency,latency, tool_result=None, anomaly_flag=False):
 
     llm_output = llm_output or {}
@@ -36,7 +59,7 @@ def build_response(query, case_type, plan, rag_result, llm_output,query_latency,
         "execution_plan": plan,
 
         "rag_score": rag_result.get("score"),
-        "similar_case": similar_case,
+        
 
         "llm_output": llm_output,
 
@@ -47,17 +70,52 @@ def build_response(query, case_type, plan, rag_result, llm_output,query_latency,
         "confidence": llm_output.get("confidence", "medium"),
         "latency": latency
     }'''
+    problem = get_field(
+        llm_output,
+        similar_case,
+        "issue",
+        "Description"
+    )
+
+    root_cause = get_field(
+        llm_output,
+        similar_case,
+        "performance_risk",
+        "Root Cause"
+    )
+
+    suggestion = get_field(
+        llm_output,
+        similar_case,
+        "suggestion",
+        "Suggestion"
+    )
+    performance_risk = (
+    llm_output.get("performance_risk")
+    or extract_from_case(similar_case, "Latency")
+    or ""
+    )
     return  {
     "query": query,
     "case_type": case_type,
     "latency": latency,
     "query_execution_latency": query_latency,
-    
+    "similar_case": similar_case,
     "analysis": {
-            "problem": llm_output.get("issue", ""),   # Accessing 'issue' from cleaned LLM output
-            "root_cause": llm_output.get("performance_risk", ""),   # Accessing 'performance_risk' from cleaned LLM output
-            "suggestion": llm_output.get("suggestion", ""),
-            "confidence": llm_output.get("confidence", "medium")
+            "problem": problem,
+
+            "root_cause": root_cause,
+
+            "suggestion": suggestion,
+
+            "performance_risk": performance_risk,
+            "confidence": llm_output.get("confidence", "medium"),
+            "performance_risk": llm_output.get("performance_risk", ""),
+            "complexity": llm_output.get("complexity", ""),
+            "bottleneck_type": llm_output.get("bottleneck_type", ""),
+            "priority": llm_output.get("priority", ""),
+            "index_recommendation": llm_output.get("index_recommendation", ""),
+            "risk_summary": llm_output.get("risk_summary", "")
         },
 
     "sql": {
@@ -140,8 +198,10 @@ def ask():
 
     # Choose valid one
     if "issue" in primary_llm:
+        print("Using primary LLM output")
         final_llm = primary_llm
     elif "issue" in tool_llm:
+        print("Using tool LLM output")
         final_llm = tool_llm
     else:
         final_llm = {}
@@ -165,7 +225,7 @@ def ask():
     )
     
     print("Completed processing in", latency, "seconds");
-    print("Final response:", final)
+    print("Final response:", final_llm)
     return jsonify(final)
 
 @app.route("/analyze", methods=["POST"])
