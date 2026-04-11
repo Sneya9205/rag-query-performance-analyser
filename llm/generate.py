@@ -11,7 +11,7 @@ llm_breaker = CircuitBreaker(
 def call_llm(prompt):
     return llm_breaker.call(
         ollama.chat,
-        model="phi3",
+        model="phi3:mini",
         messages=[{"role": "user", "content": prompt}]
     )
 def clean_json_output(text):
@@ -104,6 +104,13 @@ def generate_response(user_query, retrieved_case):
 
     try:
         parsed = json.loads(cleaned)
+
+        parsed = {
+            "issue": parsed.get("issue", ""),
+            "performance_risk": parsed.get("performance_risk", ""),
+            "suggestion": parsed.get("suggestion", ""),
+            "optimized_query": parsed.get("optimized_query", "")
+        }
         return {
             "type": "llm_response",
             "result": parsed
@@ -135,7 +142,7 @@ Return JSON:
 """
 
     response = ollama.chat(
-        model="phi3",
+        model="phi3:mini",
         messages=[{"role": "user", "content": prompt}]
     )
 

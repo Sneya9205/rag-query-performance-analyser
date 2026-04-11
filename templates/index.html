@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SQL AI Agent</title>
+</head>
+<body>
+
+<h2>SQL Analyzer</h2>
+
+<textarea id="query" rows="4" cols="50"></textarea><br><br>
+
+<button onclick="sendQuery()">Analyze</button>
+
+<pre id="output"></pre>
+
+<script>
+function renderResponse(data) {
+    return `
+================ SQL AI ANALYSIS ================
+
+QUERY:
+${data.query}
+
+TYPE:
+${data.case_type}
+
+LATENCY:
+${data.latency}s
+
+--------------------------------------------------
+
+ANALYSIS:
+• Problem: ${data.analysis?.problem || "-"}
+• Root Cause: ${data.analysis?.root_cause || "-"}
+• Suggestion: ${data.analysis?.suggestion || "-"}
+• Confidence: ${data.analysis?.confidence || "-"}
+
+--------------------------------------------------
+
+SQL INFO:
+• Execution Plan: ${data.sql?.execution_plan || "-"}
+• Anomaly: ${data.sql?.anomaly ? "Yes" : "No"}
+
+--------------------------------------------------
+
+RAG MATCH:
+• Score: ${data.rag?.score || "-"}
+• Similar Case:
+${data.rag?.similar_case || "-"}
+
+--------------------------------------------------
+
+TOOL RESULT:
+${JSON.stringify(data.tool, null, 2)}
+
+==================================================
+`;
+}
+function renderError(data) {
+    return `
+================ SQL ERROR ================
+
+ERROR TYPE:
+${data.type}
+
+MESSAGE:
+${data.error}
+
+==========================================
+`;
+}
+async function sendQuery() {
+    const query = document.getElementById("query").value;
+    document.getElementById("output").textContent = "Processing...";
+    const res = await fetch("/ask", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({query})
+    });
+
+    const data = await res.json();
+    if (data.type === "sql_error") {
+        document.getElementById("output").textContent = renderError(data);
+        return;
+    }
+
+    document.getElementById("output").textContent =
+        renderResponse(data);
+}
+</script>
+
+</body>
+</html>

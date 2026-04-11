@@ -16,11 +16,14 @@ texts = []
 # Convert each case to text
 for case in cases:
     text = f"""
+    Case ID: {case['case_id']}
     Description: {case['description']}
     Query: {case['query']}
+    Latency: {case['latency']}
     Context: {case['context']}
     Root Cause: {case['root_cause']}
     Suggestion: {case['suggestion']}
+    Tags: {", ".join(case['tags'])}
     """
     texts.append(text)
 

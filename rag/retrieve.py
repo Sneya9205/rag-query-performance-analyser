@@ -16,7 +16,17 @@ index = faiss.read_index("rag/case_index.faiss")
 with open("rag/case_texts.json", "r") as f:
     texts = json.load(f)
 
-
+def normalize_case(case):
+    return {
+        "case_id": case.get("case_id", ""),
+        "description": case.get("description", ""),
+        "query": case.get("query", ""),
+        "latency": case.get("latency", ""),
+        "context": case.get("context", ""),
+        "root_cause": case.get("root_cause", ""),
+        "suggestion": case.get("suggestion", ""),
+        "tags": case.get("tags", []),
+    }
 def retrieve_case(query, k=1):
     # Convert query to embedding
     query_embedding = model.encode([query])
@@ -29,8 +39,9 @@ def retrieve_case(query, k=1):
     score = float(distances[0][0])
 
     results = []
-
+    print("Retrieved Cases:\n")
     for i in indices[0]:
+        print(texts[i])
         results.append(texts[i])
 
     result={
