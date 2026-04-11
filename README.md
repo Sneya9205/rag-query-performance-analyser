@@ -14,7 +14,8 @@ This project is an **AI-powered SQL performance analysis system** that combines:
 
 #  System Architecture
 
-<img width="548" height="462" alt="Architecture" src="https://github.com/user-attachments/assets/6866fca6-0470-4ac0-9050-07f766e6b15a" />
+<img width="680" height="509" alt="architecture2 drawio" src="https://github.com/user-attachments/assets/d55de324-bea8-4195-8046-315ea1d0d1ce" />
+
 ##  High-Level Flow
 
 ```
@@ -166,6 +167,54 @@ Combines outputs from all layers:
   "latency": 120.5
 }
 ```
+
+### 6. Logging Layer (Observability)
+This layer tracks system activity across the pipeline.
+#### Responsibilities
+•	Log incoming queries
+•	Track execution flow
+•	Record SQL analysis latency
+•	Track LLM and tool usage
+•	Store error logs
+#### Example
+log_event(f"Query received: {user_query}")
+log_event(f"SQL analysis latency: {latency}")
+#### Why It Matters
+•	Helps debugging issues
+•	Enables performance monitoring
+•	Provides audit visibility
+________________________________________
+### 7. Caching Layer (Performance Optimization)
+This layer avoids recomputing expensive operations.
+#### Responsibilities
+•	Cache repeated query processing
+•	Avoid repeated embedding generation
+•	Speed up FAISS retrieval
+#### Implementation
+```
+@lru_cache(maxsize=100)
+def cache_process_query(query):
+```
+
+#### Why It Matters
+•	Reduces latency
+•	Improves throughput
+•	Prevents redundant computation
+________________________________________
+### 8. Latency Tracking Layer
+This layer measures performance across the full pipeline.
+#### Tracks
+•	SQL analysis time
+•	RAG retrieval time
+•	LLM inference time
+•	Total request time
+#### Example
+start = time.time()
+latency = time.time() - start
+Why It Matters
+•	Identifies bottlenecks
+•	Helps optimize system performance
+________________________________________
 
 ---
 
@@ -453,12 +502,93 @@ Tracking system performance is essential in production environments.
 * Improves debugging capability
 * Supports system reliability
 ---
+## Steps to Run the Project
+1. Clone the Repository
+git clone https://github.com/Sneya9205/rag-query-performance-analyser.git
+cd rag-query-performance-analyser
+________________________________________
+2. Create Virtual Environment
+Windows:
+python -m venv .venv
+.venv\Scripts\activate
+Mac/Linux:
+python3 -m venv .venv
+source .venv/bin/activate
+________________________________________
+3. Install Dependencies
+pip install -r requirements.txt
+________________________________________
+4. Install Ollama
+Download and install Ollama from:
+https://ollama.com/download
+Verify installation:
+ollama --version
+________________________________________
+5. Pull the Phi-3 Mini Model
+This project uses the phi3:mini model.
+Run:
+ollama pull phi3:mini
+This step is required only once.
+________________________________________
+6. Start Ollama
+Run:
+ollama serve
+Ollama runs locally at:
+http://localhost:11434
+Make sure it is running before starting the backend.
+________________________________________
+7. Run the Backend and Frontend
+Start the backend:
+python app.py
+The page will run at:
+http://127.0.0.1:5000
+
+Enter a SQL query in the input field and submit the request.
+
+The system will process the query through SQL analysis, retrieval, and LLM reasoning. 
+The response will be displayed after processing completes. Initial responses may take longer depending on model loading and system performance.
+---
+### Design Choices
+•	FAISS for Retrieval
+FAISS was chosen for fast vector similarity search over stored SQL cases. It provides efficient nearest-neighbor retrieval with low latency on local systems. 
+•	Phi-3 Mini via Ollama
+The phi3:mini model was selected to balance reasoning capability with local execution feasibility. Running locally avoids external API dependency and improves privacy. 
+•	Flask Backend
+Flask was used due to its simplicity and flexibility for building lightweight APIs and integrating multiple processing stages. 
+•	LRU Caching for Repeated Queries
+An in-memory cache (lru_cache) was used to reduce repeated computation for similar queries and improve response time. 
+•	Logging and Latency Tracking
+Logging was integrated to monitor execution stages and measure performance across SQL analysis, retrieval, and LLM reasoning. 
+________________________________________
+### Trade-offs
+•	Local LLM vs Cloud Models
+Using a local model reduces dependency on external APIs but increases response time compared to cloud-hosted models. 
+•	In-Memory Caching vs Distributed Cache
+LRU caching improves speed for repeated queries but does not scale across multiple instances like Redis would. 
+•	FAISS Local Index vs Vector Database
+FAISS provides fast local retrieval but lacks advanced indexing and scaling features available in production-grade vector databases. 
+•	Sequential Processing vs Asynchronous Execution
+The pipeline processes steps sequentially, which simplifies design but increases total response time under heavy workloads. 
+________________________________________
+### Improvements
+•	Add Streaming Responses
+Introduce WebSockets or Server-Sent Events (SSE) to stream intermediate results and reduce perceived latency. 
+•	Introduce Distributed Caching
+Replace in-memory caching with Redis to support multi-instance scalability. 
+•	Optimize Model Performance
+Use quantized models or GPU acceleration to reduce inference latency. 
+•	Add Asynchronous Task Processing
+Use background workers or queues to handle long-running operations. 
+•	Improve Retrieval Pipeline
+Add hybrid search (vector + keyword matching) to improve retrieval accuracy.
+
+
+---
 
 #  Future Improvements
 
-* Add real DB execution (`EXPLAIN ANALYZE`)
 * Support PostgreSQL / MySQL connectors
-* Add caching layer for RAG + SQL plans
+* Add Redis caching layer for RAG + SQL plans
 * Improve tool selection using classifier model
 * Add streaming LLM responses
 * Build dashboard analytics UI
