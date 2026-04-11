@@ -1,4 +1,6 @@
 TOOL_REGISTRY = {}
+import json
+import re
 
 def mcp_tool(name, description):
     """Register function as MCP-style tool"""
@@ -47,15 +49,15 @@ def check_sql_syntax(query):
     name="analyze_query",
     description="Analyze SQL query performance patterns"
 )
-def analyze_query(query_text):
+def analyze_query(query):
 
-    if "SELECT *" in query_text:
+    if "SELECT *" in query:
         return {
             "problem": "Full table scan detected",
             "impact": "High latency risk"
         }
 
-    if "JOIN" in query_text:
+    if "JOIN" in query:
         return {
             "problem": "Complex JOIN detected",
             "impact": "Medium latency risk"
@@ -71,9 +73,9 @@ def analyze_query(query_text):
     name="detect_anomaly",
     description="Detect latency anomalies"
 )
-def detect_anomaly(case_text):
+def detect_anomaly(query):
 
-    if "50 seconds" in case_text:
+    if "50 seconds" in query:
         return {
             "is_anomaly": True,
             "reason": "Latency spike detected"
@@ -88,7 +90,7 @@ def detect_anomaly(case_text):
     name="suggest_optimization",
     description="Suggest SQL optimizations"
 )
-def suggest_optimization(case_text):
+def suggest_optimization(query):
 
     suggestions = []
 
@@ -111,7 +113,7 @@ def suggest_optimization(case_text):
         suggestions.append(
             "Add WHERE clause to reduce scan"
         )
-    if "JSON" in case_text:
+    if "JSON" in query:
         suggestions.append(
             "Add index on JSON field"
         )
