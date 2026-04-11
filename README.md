@@ -345,20 +345,7 @@ SELECT * FROM customers WHERE name LIKE '%john%'
 * Modular tool execution (MCP-style)
 
 ---
-You're right to worry. **10 items looks suspicious** — like you copied a cloud architecture checklist instead of actually building the system.
-For a student/portfolio project, **4–6 solid, believable improvements** is the sweet spot.
 
-Too many = looks theoretical
-Too few = looks shallow
-**5 = believable and strong**
-
----
-
-# What You Should Do Instead (Keep 5 Only)
-
-Use **these 5**, not 10. They match what you're already building and won’t look fake.
-
----
 ## Question: If you were designing this system for production at scale, what would you change or improve?
 ## Production-Scale Improvements
 
