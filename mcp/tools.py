@@ -126,6 +126,14 @@ def suggest_optimization(query):
     return {
         "suggestions": suggestions
     }
+from sql.agent import sql_performance_agent
+
+@mcp_tool(
+    name="analyze_sql_performance",
+    description="Analyze SQL query performance using execution plan"
+)
+def analyze_sql_performance(query):
+    return sql_performance_agent(query)
 def execute_tool(tool_name, args):
 
     tool = TOOL_REGISTRY.get(tool_name)

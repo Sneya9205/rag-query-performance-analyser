@@ -114,3 +114,29 @@ def generate_response(user_query, retrieved_case):
             "type": "error",
             "raw_output": output
         }
+
+def analyze_with_llm(query, plan_text):
+    prompt = f"""
+You are a SQL performance expert.
+
+QUERY:
+{query}
+
+EXPLAIN QUERY PLAN:
+{plan_text}
+
+Return JSON:
+{{
+  "issue": "...",
+  "performance_risk": "...",
+  "suggestion": "...",
+  "optimized_query": "..."
+}}
+"""
+
+    response = ollama.chat(
+        model="phi3",
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    return response["message"]["content"]
