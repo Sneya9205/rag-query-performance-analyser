@@ -1,7 +1,9 @@
+from tracemalloc import start
+
 import faiss
 import json
 import numpy as np
-
+import time
 from sentence_transformers import SentenceTransformer
 
 # Load model
@@ -24,9 +26,15 @@ def retrieve_case(query, k=1):
     # Search similar cases
     distances, indices = index.search(query_embedding, k)
 
+    score = float(distances[0][0])
+
     results = []
 
     for i in indices[0]:
         results.append(texts[i])
 
-    return results
+    result={
+        "cases": results,
+        "score": score
+        }
+    return result
